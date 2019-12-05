@@ -167,27 +167,66 @@ std::string generateSuper(const std::string& vals) {
 	if (vals.length() == 2) {
 		return vals + vals[0];
 	}
+	//Example.
+	/*     121
+		 12 | 21
+	12 3 12 | 21 3 21
+		123121321 */
+	//  123121321
+	/*                              123121321
+	     123    |    231    |    312    |    213    |    132    |    321
+	  123 4 1   | 231 4 2   | 312 4 3   | 213 4 2   | 132 4 1   | 321 4 321
+                        123412314231243121342132413214321 */
+	                  //123412314231243121342132413214321
+	//Get previous size
+	std::string previus = vals.substr(0, vals.length() - 1);
 
 	//Generate supermermentation for n - 1
-	std::string supernminus1 = generateSuper(vals.substr(0, vals.length() - 1));
+	std::string supernminus1 = generateSuper(previus);
 
-	//Example.
-	/*
-		   121
-	     12 | 21
-	12 3 12 | 21 3 21
-	    123121321
-	
-	*/
+	//Create Subsets
+	std::vector<std::string> sets;
+	for (int i = 0; i < supernminus1.size() - previus.size() +1; i++) {
+		sets.push_back(supernminus1.substr(i, previus.size()));
+	}
 
-	//Unpack n - 1 sets
-	uint32_t center = supernminus1.length() / 2;
-	std::string left = supernminus1.substr(0, center + 1);
-	std::string right = supernminus1.substr(center);
-	std::string newchar = std::string(1,vals[vals.length() -1]);
+	std::string center;
+	//Make even
+	if (sets.size() % 2 != 0) {
+		center = sets[sets.size() / 2];
+		sets.erase(sets.begin() + sets.size() /2);
+	}
+	else {
+		//center = sets[sets.size() - 1].substr(previus.size() - 1);
+		center = "2";
+	}
 
-	//Add subpermutation to both sides of new set
-	return left + newchar + left.substr(0, left.length() - 1) + right + newchar + right;
+	//Remove half
+	sets.erase(sets.begin() + sets.size() / 2,sets.end());
+
+	//Merge Subsets
+	std::string half;
+	char newchar = vals[vals.size() - 1];
+	for (int i = 0; i < sets.size();i++) {
+		half += sets[i];
+		half += newchar;
+		half += sets[i].substr(0,1);
+	}
+	half += center;
+
+	std::string output;
+
+	//Resize
+	output.reserve((half.size() * 2) - 1);
+	//add first half
+	output += half;
+	//remove center digits
+	half.erase(half.end() - center.size(),half.end());
+	//reverse
+	std::reverse(half.begin(), half.end());
+	//add second half
+	output += half;
+	return output;
 }
 
 void generateAndCheckSuper(const char* vars) {
@@ -197,6 +236,7 @@ void generateAndCheckSuper(const char* vars) {
 }
 
 int main(int argc, char* args) {
+	generateAndCheckSuper("12345678");
 	const char* super_4_2 = "123412314231243121342132413214321";
 	checkSuper(Super::n2, "12");
 	checkSuper(Super::n3, "123");
